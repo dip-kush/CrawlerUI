@@ -12,7 +12,7 @@
 
     <body>
       <!--Import jQuery before materialize.js-->
-      <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+      <script type="text/javascript" src="static/js/jquery-2.1.1.min.js"></script>
       <script type="text/javascript" src="static/js/materialize.min.js"></script>
 
       <nav class="grey" role="navigation">
@@ -27,35 +27,77 @@
     <div class="row">
     <p class="flow text"><h3>Crawler Specifications</h3><font color="black"></p>
 
-      <form class="col s12">
+      <form class="col s12" action="/crawl/" method="post" enctype="multipart/form-data> {% csrf_token %}
       <div class="row">
+        <div class="file-field input-field col s6">
+        <div class="btn">
+        <span>Login Script File</span>
+        <input type="file" name="login-script" id="login-script">
+        </div>
+        <div class="file-path-wrapper">
+        <input class="file-path validate" type="text">
+        </div>
+        </div>
         <div class="input-field col s6">
-          <input placeholder="Placeholder" id="first_name" type="text" class="validate">
-          <label for="first_name">First Name</label>
+          <input id="login-url" name="login-url" type="text" class="validate">
+          <label for="login-url">Login Url</label>
         </div>
-        <div class="input-field col s6">
-          <input id="last_name" type="text" class="validate">
-          <label for="last_name">Last Name</label>
+      </div>
+
+      </div>
+      <div class="row">
+     <div class="file-field input-field col s12">
+      <div class="btn">
+        <span>Form Values File</span>
+        <input type="file" name="form-values-script" id="form-values-script">
+      </div>
+      <div class="file-path-wrapper">
+        <input class="file-path validate" type="text">
+      </div>
+    </div>
+    </div>
+
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="base-address" name="base-address" type="text" class="validate">
+          <label for="base-address">Base-Address</label>
         </div>
       </div>
       <div class="row">
         <div class="input-field col s12">
-          <input disabled value="I am not editable" id="disabled" type="text" class="validate">
-          <label for="disabled">Disabled</label>
+          <input id="start-url" name="start-url" type="text" class="validate">
+          <label for="start-url">Start Url</label>
+        </div>
+      </div>
+    <div class="row">
+        <div class="input-field col s12">
+          <input id="black-list-urls" name="black-list-urls" type="text" class="validate">
+          <label for="black-list-urls">Black List Urls (Give a List Comma Separated)</label>
         </div>
       </div>
       <div class="row">
         <div class="input-field col s12">
-          <input id="password" type="password" class="validate">
-          <label for="password">Password</label>
+          <input id="scope-urls" name="scope-urls" type="text" class="validate">
+          <label for="scope-urls">Scope-Urls (Give a List comma separated)</label>
         </div>
       </div>
+
       <div class="row">
         <div class="input-field col s12">
-          <input id="email" type="email" class="validate">
-          <label for="email">Email</label>
+          <input id="wait-time" name="wait-time" type="text" class="validate">
+          <label for="wait-time">Global Wait Time</label>
         </div>
       </div>
+
+      <center> 
+      <button class="btn waves-effect waves-light grey darken-3" type="submit" name="action">Submit
+      </button> 
+      </center
+
+      
+            
+      
+
     </form>
     </div>
 
