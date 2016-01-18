@@ -1,106 +1,263 @@
- <!DOCTYPE html>
-  <html>
-    <head>
-      <!--Import Google Icon Font-->
-      <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-      <!--Import materialize.css-->
-      <link type="text/css" rel="stylesheet" href="static/css/materialize.min.css"  media="screen,projection"/>
+<!DOCTYPE html>
+<html>
 
-      <!--Let browser know website is optimized for mobile-->
-      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    </head>
+<head>
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="static/css/materialize.min.css" media="screen,projection" />
 
-    <body>
-      <!--Import jQuery before materialize.js-->
-      <script type="text/javascript" src="static/js/jquery-2.1.1.min.js"></script>
-      <script type="text/javascript" src="static/js/materialize.min.js"></script>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-      <nav class="grey" role="navigation">
-             <div class="nav-wrapper container">
-                <img src="static/img/black-spider.png">
-                <a href="#" class="brand-logo white-text">&nbsp;&nbsp;AJAX CRAWLER </a>
-                
-            </div>
-        </nav>
+     <script type="text/javascript" src="static/js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="static/js/materialize.min.js"></script>
+    <script type="text/javascript">
+    	$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (settings.type == 'POST' || settings.type == 'PUT' || settings.type == 'DELETE') {
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        }
+    		}
+		});
 
 
-    <div class="row">
-    <p class="flow text"><h3>Crawler Specifications</h3><font color="black"></p>
+       $( document ).ready(function() {
+        $(".use-address").click(function() {
+        	console.log("button clicked")
+   			 var id = $(this).closest("tr")   // Finds the closest row <tr>
+                       .find(".id")     // Gets a descendent with class="nr"
+                       .text();         // Retrieves the text within <td>
 
-      <form id="upload" class="col s12" action="/crawl/" method="post" enctype="multipart/form-data"> {% csrf_token %}
-      <div class="row">
-        <div class="file-field input-field col s6">
-        <div class="btn">
-        <span>Login Script File</span>
-        <input type="file" name="login-script" id="login-script">
+
+			 $.ajax({
+			     type: 'post',
+    			 url: 'runcrawl/',
+     			 data: {'id': id},
+
+     			 success: function(server_response){
+
+           		 server_data = JSON.parse(server_response);
+         		 if(server_data.success == 1)//if ajax_check_username.php return value "0"
+         		   {
+             		console.log("running crawl")
+                //updateCrawlLog()
+         		   }
+         		else
+         		{
+             		console.log("unable to run crawl")
+         		}
+     		}
+
+    });
+    updateCrawlLog()
+		    	       // Outputs the answer
+		});
+    })
+
+
+      function updateCrawlLog(){
+        console.log("updating crawl log");
+      	 var myLog = setInterval(function(){
+           $.ajax({
+              type: 'post',
+              url: 'updatelog/',
+
+              success: function(server_response){
+                  server_data = JSON.parse(server_response);
+                  console.log(server_data)
+                  $("#log-table tr").remove();
+                  log = server_data.log.split("|||");
+                  table_rows = "";
+                  log_length = log.length
+                  for (var i = 0; i < log_length; i++) {
+                        table_rows+="<tr><td>"+log[i]+"</td></tr>";
+                  }
+                  $("#log-table").append(table_rows);
+
+                  if(server_data.end == 1)//if ajax_check_username.php return value "0"
+                    {
+                     console.log("end log");
+                     clearInterval(myLog);
+                    }
+             }
+
+        });
+      }, 3000);
+
+      }
+    </script>
+
+
+
+</head>
+
+<body>
+    <!--Import jQuery before materialize.js-->
+
+
+    <nav class="grey" role="navigation">
+        <div class="nav-wrapper container">
+            <img src="static/img/black-spider.png">
+            <a href="#" class="brand-logo white-text">&nbsp;&nbsp;AJAX CRAWLER </a>
+
         </div>
-        <div class="file-path-wrapper">
-        <input class="file-path validate" type="text">
-        </div>
-        </div>
-        <div class="input-field col s6">
-          <input id="login-url" name="login-url" type="text" class="validate">
-          <label for="login-url">Login Url</label>
-        </div>
-      </div>
-
-      </div>
-      <div class="row">
-     <div class="file-field input-field col s12">
-      <div class="btn">
-        <span>Form Values File</span>
-        <input type="file" name="form-values-script" id="form-values-script">
-      </div>
-      <div class="file-path-wrapper">
-        <input class="file-path validate" type="text">
-      </div>
-    </div>
-    </div>
-
-      <div class="row">
-        <div class="input-field col s12">
-          <input id="base-address" name="base-address" type="text" class="validate">
-          <label for="base-address">Base-Address</label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <input id="start-url" name="start-url" type="text" class="validate">
-          <label for="start-url">Start Url</label>
-        </div>
-      </div>
-    <div class="row">
-        <div class="input-field col s12">
-          <input id="black-list-urls" name="black-list-urls" type="text" class="validate">
-          <label for="black-list-urls">Black List Urls (Give a List Comma Separated)</label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <input id="scope-urls" name="scope-urls" type="text" class="validate">
-          <label for="scope-urls">Scope-Urls (Give a List comma separated)</label>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="input-field col s12">
-          <input id="wait-time" name="wait-time" type="text" class="validate">
-          <label for="wait-time">Global Wait Time</label>
-        </div>
-      </div>
-
-      <center> 
-      <button class="btn waves-effect waves-light grey darken-3" type="submit" name="action">Submit
-      </button> 
-      </center
-
-      
-            
-      
-
-    </form>
-    </div>
+    </nav>
 
 
-    </body>
-  </html>
+    <ul class="collapsible" data-collapsible="accordion">
+
+        <li>
+            <div class="collapsible-header active">Crawler Specifications</div>
+
+            <!--         	<p class="flow text"><h3>Crawler Specifications</h3><font color="black"></p>
+ -->
+            <div class="collapsible-body">
+                <div class="row">
+
+                    <form id="upload" class="col s12" action="/crawl/" method="post" enctype="multipart/form-data">{% csrf_token %}
+
+                    		<div class="row">
+                            <div class="file-field input-field col s6">
+                                <div class="btn">
+                                    <span>Login Script File</span>
+                                    <input type="file" name="login-script" id="login-script">
+                                </div>
+                                <div class="file-path-wrapper">
+                                    <input class="file-path validate" type="text">
+                                </div>
+                            </div>
+
+                            <div class="file-field input-field col s6">
+                                <div class="btn">
+                                    <span>Form Values File</span>
+                                    <input type="file" name="form-values-script" id="form-values-script">
+                                </div>
+                                <div class="file-path-wrapper">
+                                    <input class="file-path validate" type="text">
+                                </div>
+                            </div>
+                            </div>
+
+
+
+
+	                        <div class="row">
+
+	                            <div class="input-field col s4">
+	                                <input id="login-url" name="login-url" type="text" class="validate">
+	                                <label for="login-url">Login Url</label>
+	                            </div>
+
+	                            <div class="input-field col s4">
+	                                <input id="base-address" name="base-address" type="text" class="validate">
+	                                <label for="base-address">Base-Address</label>
+	                            </div>
+
+	                            <div class="input-field col s4">
+	                                <input id="start-url" name="start-url" type="text" class="validate">
+	                                <label for="start-url">Start Url</label>
+	                            </div>
+	                        </div>
+
+
+	                        <div class="row">
+    	                        <div class="input-field col s4">
+	                                <input id="black-list-urls" name="black-list-urls" type="text" class="validate">
+	                                <label for="black-list-urls">Black List Urls (Give a List Comma Separated)</label>
+	                            </div>
+	                            <div class="input-field col s4">
+                                	<input id="scope-urls" name="scope-urls" type="text" class="validate">
+                                	<label for="scope-urls">Scope-Urls (Give a List comma separated)</label>
+                            	</div>
+
+                            	<div class="input-field col s4">
+                          	      <input id="wait-time" name="wait-time" type="text" class="validate">
+                            	    <label for="wait-time">Global Wait Time</label>
+                            	</div>
+
+	                        </div>
+
+                        	<center>
+                           	 	<button class="btn waves-effect waves-light grey darken-3" type="submit" name="action">Submit
+ 	                           </button>
+    	                    </center
+
+                	</form>
+                	</form>
+
+
+
+                </div>
+                </div>
+
+                <li>
+                    <div class="collapsible-header">Last 4 Runs</div>
+                    <div class="collapsible-body">
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-field="id">id</th>
+                                    <th data-field="base-address">base-address</th>
+                                    <th data-field="start-url">start-url</th>
+                                    <th data-field="scope-urls">scope-urls</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for item in crawl_list %}
+                                <tr>
+                                    <td class="id">{{ item.id }}</td>
+                                    <td>{{ item.base_address }}</td>
+                                    <td>{{ item.start_url }}</td>
+                                    <td>{{ item.scope_urls }}</td>
+                                    <td>
+                                        <button class="use-address btn waves-effect waves-light" class="submit" name="action">Run</button>
+                                    </td>
+
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </li>
+
+                 <li>
+      				<div class="collapsible-header"><i class="material-icons">whatshot</i>Log</div>
+      				<div class="collapsible-body">
+      					<div>
+      						<table class="striped" id="log-table">
+      						 	<tr><td>Hello</td></tr>
+      						 	<tr><td>World</td></tr>
+      						</table>
+      					</div>
+
+      				</div>
+    			</li>
+
+          <a href="updatelog"> update </a>
+
+</body>
+
+</html>

@@ -106,3 +106,15 @@ MEDIA_ROOT = (
 
 MEDIA_URL = '/media/'
 
+
+
+MEDIA_ROOT = (
+    #os.path.join(BASE_DIR, "media"),
+    os.path.join(os.path.dirname(__file__), '..', 'media').replace('\\','/')
+
+)
+
+
+MAX_UPLOAD_SIZE = '20971520'
+
+CONTENT_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'text/html']

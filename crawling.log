@@ -1,0 +1,11 @@
+2016-01-18 09:04:29,167 crawler.FormExtractor 62 INFO     (<class 'selenium.common.exceptions.NoSuchElementException'>, NoSuchElementException(), <traceback object at 0x7ff73b1e55a8>)
+2016-01-18 09:04:29,192 crawler.FormExtractor 69 INFO     (<class 'selenium.common.exceptions.NoSuchElementException'>, NoSuchElementException(), <traceback object at 0x7ff73b1e5e60>)
+2016-01-18 09:04:29,211 crawler.FormExtractor 76 INFO     (<class 'selenium.common.exceptions.NoSuchElementException'>, NoSuchElementException(), <traceback object at 0x7ff73b1e5518>)
+2016-01-18 09:04:35,509 crawler.FormExtractor 76 INFO     (<class 'selenium.common.exceptions.NoSuchElementException'>, NoSuchElementException(), <traceback object at 0x7ff73b1e5a70>)
+2016-01-18 09:04:41,836 crawler.FormExtractor 62 INFO     (<class 'selenium.common.exceptions.NoSuchElementException'>, NoSuchElementException(), <traceback object at 0x7ff73b20b440>)
+2016-01-18 09:04:41,849 crawler.FormExtractor 69 INFO     (<class 'selenium.common.exceptions.NoSuchElementException'>, NoSuchElementException(), <traceback object at 0x7ff73b20b560>)
+2016-01-18 09:04:41,857 crawler.FormExtractor 76 INFO     (<class 'selenium.common.exceptions.NoSuchElementException'>, NoSuchElementException(), <traceback object at 0x7ff73b20b3b0>)
+o get a New State
+2016-01-18 09:04:43,859 crawler.Crawler 111 INFO     Initiating Crawling Submit Button
+2016-01-18 09:04:47,935 crawler.Crawler 34 INFO     THE END
+2016-01-18 09:04:47,937 crawler.Crawler 42 INFO     Number of Node Found 3
