@@ -3,6 +3,7 @@ from django.template import Context
 from django.http import HttpResponse
 from django.shortcuts import render
 from ExtractDom import initializeParams
+from BeautifulSoup import BeautifulSoup
 from models import Crawl
 import json,os
 # Create your views here.
@@ -27,17 +28,25 @@ def crawlingController(request):
         crawling_spec["black_list_urls"] = request.POST.get('black-list-urls', "")
         crawling_spec["scope_urls"] = request.POST.get('scope-urls', "")
         crawling_spec["wait_time"] = request.POST.get('wait-time', "")
-        print crawling_spec
-        print crawling_spec['login_script']
+        crawling_spec["depth"] = request.POST.get('depth', "100")
+        #print crawling_spec
+        data = ""
+        lines = crawling_spec['login_script'].readlines()
+        for line in lines:
+            data = data+line.strip()
+        bs =  BeautifulSoup(data)
+        #print bs.findAll("tr") 
         obj = Crawl(login_script =  crawling_spec["login_script"], login_url = crawling_spec["login_url"] , \
                                     form_values_script = crawling_spec["form_values_script"] , \
                                     base_address =  crawling_spec["base_address"],start_url =  crawling_spec["start_url"], \
                                     black_list_urls =  crawling_spec["black_list_urls"], \
                                     scope_urls =  crawling_spec["scope_urls"], \
-                                    wait_time =  crawling_spec["wait_time"])
+                                    wait_time =  crawling_spec["wait_time"], \
+                                    depth = crawling_spec["depth"])
         #print login_script, login_url, form_values_script, base_address, start_url, black_list_urls, scope_urls, wait_time
-        obj.save()
-        #initializeParams(crawling_spec)
+        #obj.save()
+        crawling_spec["login_script"] = data
+        initializeParams(crawling_spec)
         return HttpResponse("Do something")
 
 
@@ -54,7 +63,7 @@ def runcrawl(request):
                 crawl_spec_dict = {"login_script": crawl.login_script, "login_url": crawl.login_url, \
                                     "form_values_script": crawl.form_values_script, "base_address": crawl.base_address, \
                                     "start_url": crawl.start_url, "black_list_urls":crawl.black_list_urls, \
-                                    "scope_urls":crawl.scope_urls, "wait_time": crawl.wait_time}
+                                    "scope_urls":crawl.scope_urls, "wait_time": crawl.wait_time, "depth":crawl.depth}
                 print crawl_spec_dict
                 initializeParams(crawl_spec_dict)
                 return HttpResponse(json.dumps({'success': 1}))

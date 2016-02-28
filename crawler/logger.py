@@ -34,8 +34,8 @@ def LoggerHandler(name):
     Prints the logs of Crawling
     '''
     logger = logging.getLogger(name)
-    handler = logging.FileHandler('crawling.log',mode='w')
-    #handler = logging.StreamHandler()
+    #handler = logging.FileHandler('crawling.log',mode='w')
+    handler = logging.StreamHandler()
     formatter = logging.Formatter(
         '%(asctime)s %(name)-12s %(lineno)s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
