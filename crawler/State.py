@@ -28,6 +28,9 @@ class StateMachine:
     def __init__(self):
         self.graph = nx.MultiDiGraph()
         self.doBacktrack = False
+        self.start_header = ""
+        self.login_header = ""
+
 
     def addNode(self, number, data):
         '''
@@ -70,7 +73,16 @@ class StateMachine:
             if compare_url(url, self.graph.node[n]['nodedata'].link):
                 return True
         return False
+    
+    def addEdges(self, n1, n2, et, header):
+        ''' Adding a edge from node n1 to n2 '''
 
+        self.graph.add_edge(n1, n2, event=et, header=header)
+
+    def addHeaders(self, start_header, login_header):
+        self.start_header = start_header
+        self.login_header = login_header
+        
 '''
 
 n1=NodeData()

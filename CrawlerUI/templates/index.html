@@ -12,6 +12,7 @@
 
      <script type="text/javascript" src="static/js/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="static/js/materialize.min.js"></script>
+    <script type="text/javascript" src="static/js/d3.v3.min.js"></script>
     <script type="text/javascript">
     	$.ajaxSetup({
     beforeSend: function(xhr, settings) {
@@ -41,6 +42,12 @@
 
 
        $( document ).ready(function() {
+
+        $('#readjsondata').click(function(){
+          getJsonDataFile();
+        })
+
+
         $(".use-address").click(function() {
         	console.log("button clicked")
    			 var id = $(this).closest("tr")   // Finds the closest row <tr>
@@ -68,10 +75,25 @@
      		}
 
     });
-    updateCrawlLog()
+    //updateCrawlLog()
 		    	       // Outputs the answer
 		});
     })
+
+      function getJsonDataFile(){
+        $.ajax({
+              type: 'post',
+              url: 'readJsonDataFile/',
+
+              success: function(server_response){
+                  server_data = JSON.parse(server_response);
+            
+                  console.log(JSON.parse(server_data.jsondata))
+
+             }
+
+        });
+      } 
 
 
       function updateCrawlLog(){
@@ -104,6 +126,11 @@
       }, 3000);
 
       }
+
+
+
+
+
     </script>
 
 
@@ -251,7 +278,7 @@
                 </li>
 
                  <li>
-      				<div class="collapsible-header"><i class="material-icons">whatshot</i>Log</div>
+      				<div class="collapsible-header">Log</div>
       				<div class="collapsible-body">
       					<div>
       						<table class="striped" id="log-table">
@@ -261,10 +288,29 @@
       					</div>
 
       				</div>
+
+
     			</li>
+  <div class="collapsible-header"> <a href="runcrawl">Show Graph</a>  </div>
 
-          <a href="updatelog"> update </a>
+          <li>
+            
 
+          </li>
+
+          <a id="readjsondata"> update </a>
+       
+      </ul>   
+
+<div id="svg">
+  hello world
+
+</div>
+
+      
 </body>
 
-</html>
+
+
+
+  </html>

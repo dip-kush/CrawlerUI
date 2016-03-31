@@ -18,13 +18,13 @@ def getFormFieldValue(filePath, fileHandler=None):
         #logger.info("Reading the Form Values File %s"%file)
         if fileHandler:
             file = fileHandler
-            print "form file handler"
-            print fileHandler
+            #print "form file handler"
+            #print fileHandler
         else:
             file = open(filePath).read()
         bs = BeautifulSoup(file)
-        print "BeautifulSoup"
-        print bs
+        #print "BeautifulSoup"
+        #print bs
         l = bs.findAll("tr")
         for i in range(1, len(l)):
             type = l[i].findAll("td")[0].text

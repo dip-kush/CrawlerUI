@@ -1,0 +1,15 @@
+2016-03-29 10:11:39,558 DomComparator 34 INFO     Different States Huge Difference in Tag Count
+entException'>, NoSuchElementException(), <traceback object at 0x7f8b0c0c03f8>)
+9 10:11:35,082 Crawler      301 INFO     Exist in Banned Url ignore
+2016-03-29 10:11:35,082 Crawler      301 INFO     Exist in Banned Url ignore
+2016-03-29 10:11:35,082 Crawler      301 INFO     Exist in Banned Url hobby.html
+2016-03-29 10:11:35,082 Crawler      203 INFO     Trying to click the element//input[@type="submit"][@value="feedback"]
+2016-03-29 10:11:38,529 Crawler      114 INFO     No Alert Box Found
+2016-03-29 10:11:39,546 Crawler      358 INFO     Creating a new node with title Form1
+2016-03-29 10:11:39,572 Crawler      389 INFO     Adding a New Node 1 to Graph
+2016-03-29 10:11:39,573 Crawler      393 INFO     Adding a Edge from Node 0 and 1
+2016-03-29 10:11:41,202 Crawler      177 INFO     depth exceeded
+2016-03-29 10:11:41,202 Crawler      71 INFO     Doing backtrack
+2016-03-29 10:11:41,273 Crawler      71 INFO     Doing backtrack
+2016-03-29 10:11:41,329 Crawler      44 INFO     THE END
+2016-03-29 10:11:41,336 Crawler      56 INFO     Number of Node Found 2

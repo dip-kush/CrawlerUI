@@ -42,3 +42,38 @@ def LoggerHandler(name):
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
     return logger
+
+
+
+def printRequest():
+    path = "/home/deepak/programs/proxy/requests.txt"
+    data = ""
+    try:
+        f = open(path, "r")
+        data = f.readlines()
+        data = ''.join(data)
+    except Exception as e:
+        print e
+    if data.find("HEADEREND")!=-1:
+        data = data.strip("HEADEREND")
+        headers = data.split("HEADEREND")
+        header = headers[0].strip()
+        #print headers
+        return header
+        #print headers[0].split('\n')
+    else:
+        #print data
+        #data = data.strip("RESPONSEHEADERS")
+        #print data
+        headers = data.split("RESPONSEHEADERS")
+        #print headers
+        header = headers[0].strip()
+        #print headers
+        return header
+        #print headers[0].split('\n')
+
+
+def clearContent():
+    path = "/home/deepak/programs/proxy/requests.txt"
+    f = open(path, "w")
+

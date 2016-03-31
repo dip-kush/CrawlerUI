@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from crawler.views import launch, crawlingController,runcrawl,updatelog
+from crawler.views import launch, crawlingController,runcrawl,updatelog,readJsonDataFile,showGraph
 from django.conf import settings
 from django.conf.urls.static import static
 admin.autodiscover()
@@ -14,5 +14,7 @@ urlpatterns = patterns('',
     url(r'^$', launch),
     url(r'^crawl', crawlingController),
     url(r'^runcrawl', runcrawl),
-    url(r'^updatelog', updatelog)
+    url(r'^updatelog', updatelog),
+    url(r'^readJsonDataFile',readJsonDataFile),
+    url(r'^graph', showGraph)
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
