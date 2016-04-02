@@ -48,6 +48,40 @@
         })
 
 
+        /*
+         $(".get-workflow").click(function() {
+          console.log("button clicked")
+          var id = $(this).closest("tr")   // Finds the closest row <tr>
+                       .find(".id")     // Gets a descendent with class="nr"
+                       .text();         // Retrieves the text within <td>
+
+
+       $.ajax({
+           type: 'post',
+           url: 'runcrawl/',
+           data: {'id': id},
+
+           success: function(server_response){
+
+               server_data = JSON.parse(server_response);
+             if(server_data.success == 1)//if ajax_check_username.php return value "0"
+               {
+                console.log("running crawl")
+                //updateCrawlLog()
+               }
+            else
+            {
+                console.log("unable to run crawl")
+            }
+          }
+
+        });
+      });
+
+    */
+
+
+
         $(".use-address").click(function() {
         	console.log("button clicked")
    			 var id = $(this).closest("tr")   // Finds the closest row <tr>
@@ -268,6 +302,12 @@
                                     <td>
                                         <button class="use-address btn waves-effect waves-light" class="submit" name="action">Run</button>
                                     </td>
+                                    <td><a href="getworkflow?id={{item.id}}">Workflow</a></td>
+<!--                                     <td>
+                                        <button class="get-workflow btn waves-effect waves-light" class="submit" name="action">Workflow</button>
+                                    </td>
+ -->                                    
+
 
                                 </tr>
                                 {% endfor %}
@@ -298,14 +338,10 @@
 
           </li>
 
-          <a id="readjsondata"> update </a>
+          <!-- <a id="readjsondata"> update </a> -->
        
       </ul>   
 
-<div id="svg">
-  hello world
-
-</div>
 
       
 </body>

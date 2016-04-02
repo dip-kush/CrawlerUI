@@ -29,7 +29,9 @@ class StateMachine:
         self.graph = nx.MultiDiGraph()
         self.doBacktrack = False
         self.start_header = ""
+        self.start_dom = ""
         self.login_header = ""
+        self.login_dom = ""
 
 
     def addNode(self, number, data):
@@ -79,10 +81,10 @@ class StateMachine:
 
         self.graph.add_edge(n1, n2, event=et, header=header)
 
-    def addHeaders(self, start_header, login_header):
+    def addHeaders(self, start_header, login_header, domString):
         self.start_header = start_header
         self.login_header = login_header
-        
+        self.login_dom = domString 
 '''
 
 n1=NodeData()

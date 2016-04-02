@@ -3,9 +3,9 @@ import logging.config
 
 '''
 
-logging.config.dictConfig({
+logging.config.dictconfig({
     'version': 1,
-    'disable_existing_loggers': False,  # this fixes the problem
+    'disable_existing_loggers': false,  # this fixes the problem
 
     'formatters': {
         'standard': {
@@ -14,20 +14,19 @@ logging.config.dictConfig({
     },
     'handlers': {
         'default': {
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
+            'level':'debug',
+            'class':'logging.streamhandler',
         },
     },
     'loggers': {
         '': {
             'handlers': ['default'],
-            'level': 'DEBUG',
-            'propagate': True
+            'level': 'debug',
+            'propagate': true
         }
     }
 })
 '''
-
 
 def LoggerHandler(name):
     '''
@@ -43,7 +42,7 @@ def LoggerHandler(name):
     logger.setLevel(logging.DEBUG)
     return logger
 
-
+'''
 
 def printRequest():
     path = "/home/deepak/programs/proxy/requests.txt"
@@ -71,6 +70,31 @@ def printRequest():
         #print headers
         return header
         #print headers[0].split('\n')
+'''
+
+
+def printRequest():
+    path = "/home/deepak/programs/proxy/requests.txt"
+    data = ""
+    try:
+        f = open(path, "r")
+        data = f.readlines()
+        data = ''.join(data)
+    except Exception as e:
+        print e
+    if data.find("HEADEREND")!=-1:
+        data = data.strip("HEADEREND")
+        headers = data.split("HEADEREND")
+        header = headers[0].strip()
+        header = header.replace("\r", "")
+        header = header.replace("\n\n", "\n")
+        return header
+    else:
+        headers = data.split("RESPONSEHEADERS")
+        header = headers[0].strip()
+        header = header.replace("\r", "")
+        header = header.replace("\n\n", "\n")
+        return header
 
 
 def clearContent():

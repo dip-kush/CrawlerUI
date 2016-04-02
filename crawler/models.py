@@ -26,9 +26,17 @@ class Workflow(models.Model):
 class StartHeader(models.Model):
     scan_id = models.ForeignKey(Crawl)
     start_url_header = models.CharField(max_length=1000, default="")
+    #start_method = models.CharField(max_length="5",default="")
+    #start_url = models.CharField(max_length="200",default="")
+    #start_data = models.CharField(max_length="200",default="")
+    #start_cookie = models.TextField()
     #start_dom = models.TextField()
     login_url_header = models.CharField(max_length=1000, default="") 
-    #login_dom = models.TextField()
+    #login_method = models.CharField(max_length="200",default="")
+    #login_url = models.CharField(max_length="200",default="")
+    #login_data = models.CharField(max_length="200", default="")
+    #login_cookie = models.TextField()
+    login_dom = models.TextField()
     def __str__(self):
         return str(self.id)
 
@@ -37,7 +45,11 @@ class Link(models.Model):
     link = models.CharField(max_length=200, default="")
     order_id = models.IntegerField()
     header = models.CharField(max_length=500, default="")
-    #response_dom = models.TextField()
+    #method = models.CharField(max_length="200",default="")
+    #url = models.CharField(max_length="200",default="")
+    #data = models.CharField(max_length="200", default="")
+    #cookie = models.TextField()
+    response_dom = models.TextField()
     def __str__(self):    
         return str(self.link)
     

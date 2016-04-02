@@ -24,6 +24,12 @@ class ClickableEntity:
         self.attrs = attrs
         self.xpath = xpath
         self.action = "click"
+    
+    def __str__(self):
+        return str(self.xpath)
+
+    def __repr(self):
+        return str(self.xpath)
 
     #def __str__(self):
         #return self.tag+" "+self.attrs+" "+self.xpath

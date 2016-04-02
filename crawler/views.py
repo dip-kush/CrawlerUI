@@ -5,7 +5,9 @@ from django.shortcuts import render
 from ExtractDom import initializeParams
 from BeautifulSoup import BeautifulSoup
 from models import Crawl, Workflow, Link, StartHeader
+from header import Header
 import networkx as nx
+import urllib2
 import json,os
 
 # Create your views here.
@@ -16,6 +18,7 @@ def launch(request):
     for run in crawl_runs:
         crawl_list.append({'id': run.id, 'base_address': run.base_address, 'start_url': run.start_url, 'scope_urls': run.scope_urls})
     return render(request, "index.html", {'crawl_list': crawl_list})
+
 
 
 
@@ -62,22 +65,21 @@ def crawlingController(request):
 def runcrawl(request):
     print "request"
     crawl_spec_dict = {}
-    #if request.is_ajax():
-        #if request.method == 'POST':
-    id_val = 1
-    #id_val = request.POST['id']
-    if id_val:
-        crawl = Crawl.objects.get(id=id_val)
-        print crawl
-        crawl_spec_dict = {"login_script": crawl.login_script, "login_url": crawl.login_url, \
-                            "form_values_script": crawl.form_values_script, "base_address": crawl.base_address, \
-                            "start_url": crawl.start_url, "black_list_urls":crawl.black_list_urls, \
-                            "scope_urls":crawl.scope_urls, "wait_time": crawl.wait_time, "depth":crawl.depth}
-        print crawl_spec_dict
-        fsm = initializeParams(crawl_spec_dict)
-        print "graph object",fsm.graph.nodes()
-        pathSourcetoSink(fsm, crawl, crawl.login_url)
-        return HttpResponse(json.dumps({'success': 1}))
+    if request.is_ajax():
+        if request.method == 'POST':
+        #id_val = 1
+            id_val = request.POST['id']
+            crawl = Crawl.objects.get(id=id_val)
+            print crawl
+            crawl_spec_dict = {"login_script": crawl.login_script, "login_url": crawl.login_url, \
+                                "form_values_script": crawl.form_values_script, "base_address": crawl.base_address, \
+                                "start_url": crawl.start_url, "black_list_urls":crawl.black_list_urls, \
+                                "scope_urls":crawl.scope_urls, "wait_time": crawl.wait_time, "depth":crawl.depth}
+            print crawl_spec_dict
+            fsm = initializeParams(crawl_spec_dict)
+            print "graph object",fsm.graph.nodes()
+            pathSourcetoSink(fsm, crawl, crawl.login_url)
+            return HttpResponse(json.dumps({'success': 1}))
     #retur HttpResponse(json.dumps({'success': 0}))
 
 
@@ -100,15 +102,17 @@ def pathSourcetoSink(fsm,crawl,url):
                         #print path[i]
                         link = graph.edge[path[i]][path[i+1]][0]["event"].xpath
                         header = graph.edge[path[i]][path[i+1]][0]["header"] 
+                        dom = graph.node[path[i+1]]['nodedata'].domString
                         wflow = Workflow.objects.get(scan_id=crawl,wflow_no = wflow_no)
                         #print wflow.wflow_no
-                        linkobj = Link(wflow_id = wflow, link = link, order_id = i+1,header=header)
+                        linkobj = Link(wflow_id = wflow, link = link, order_id = i+1,header=header, response_dom=dom)
                         linkobj.save()
                         print graph.edge[path[i]][path[i+1]][0]["event"].xpath
                     wflow_no+=1    
         start_url_header = fsm.start_header
         login_url_header = fsm.login_header
-        headerObj = StartHeader(scan_id=crawl,start_url_header=start_url_header,login_url_header=login_url_header)
+        login_dom = fsm.login_dom
+        headerObj = StartHeader(scan_id=crawl,start_url_header=start_url_header,login_url_header=login_url_header, login_dom = login_dom)
         headerObj.save()            
         
 def updatelog(request):
@@ -133,6 +137,65 @@ def readJsonDataFile(request):
         data = data+line.strip()
     return HttpResponse(json.dumps({'jsondata': data}))
      
+def getWorkflow(request):
+    if request.method == "GET":
+        id_val = request.GET["id"]
+        executeWorkflows(id_val)
+    return HttpResponse("success")
+
+
+def executeWorkflows(crawl_id):
+    #crawl_id = 1
+    workflows = []
+    crawl_obj =  Crawl.objects.get(id=crawl_id)
+    startHeader =  StartHeader.objects.get(scan_id=crawl_obj)
+    wflows = Workflow.objects.filter(scan_id=crawl_obj)
+    for wflow in wflows:
+        print wflow
+        links = Link.objects.filter(wflow_id=wflow).order_by("order_id")
+         #links.sort(key=lambda x:x.order_id)
+        if startHeader.login_url_header:
+            print headerSplit(startHeader.login_url_header)
+        else:
+            print headerSplit(startHeader.start_url_header)    
+        for link in links:
+            print headerSplit(link.header)
+            #print header
+
+  
+    
+
+
+
+def makePayload(data):
+    dataDict = {}
+    data = urllib2.unquote(data)
+    #print data
+    data = data.split("&")
+    #print data  
+    for param in data:
+        value = param.split("=")
+        dataDict[value[0]] = value[1]
+    return dataDict
+
+
+def headerSplit(header):
+    method = ""
+    url = ""
+    cookie = ""
+    data = ""
+    header = header.strip()
+    header = header.split("\n")
+    method, url, http = header[0].split(" ")
+    if method == "POST":
+        data = makePayload(header[-1])
+    for item in header:
+        item = item.split(": ")
+        if item[0] == "Cookie":    
+            cookie = item[1]
+    header = Header(method,url,cookie,data) 
+    return header    
+
 
 
     

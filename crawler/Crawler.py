@@ -22,7 +22,7 @@ def initState(domString, link, title, driver, globalVariables,depth,start_url,lo
     '''
     
     fsm = StateMachine()
-    fsm.addHeaders(start_url, login_header)
+    fsm.addHeaders(start_url, login_header, domString)
     node = NodeData()
     node.link = link
     node.domString = domString
@@ -55,12 +55,12 @@ def drawGraph(fsm):
     print fsm.doBacktrack
     logger.info("Number of Node Found %s" % (fsm.numberOfNodes()))
     pos = nx.spring_layout(graph)
-    labels = {k: str(k) for k in graph.nodes()}
+    #labels = {k: str(k) for k in graph.nodes()}
 
-    #labels = {k: graph.node[k]['nodedata'].title for k in graph.nodes()}
-    #nx.draw_networkx_nodes(graph, pos)
-    #nx.draw_networkx_edges(graph, pos)
-    #nx.draw_networkx_labels(graph, pos, labels)
+    labels = {k: graph.node[k]['nodedata'].title for k in graph.nodes()}
+    nx.draw_networkx_nodes(graph, pos)
+    nx.draw_networkx_edges(graph, pos)
+    nx.draw_networkx_labels(graph, pos, labels)
     #nx.draw_networkx_labels( graph ,pos, labels)
     #nx.draw(graph,node_size=3000,nodelist=graph.nodes(),node_color='b')
     #plt.show()
@@ -306,19 +306,32 @@ def checkForBannedUrls(attrs, globalVariables, currentPath):
 
 
 
+
+def printNodes(graph):
+    print "----------------------Nodes---------------------"
+    numberofnodes = graph.number_of_nodes()
+    for i in range(numberofnodes):
+        print i ,printBackTrackPath(graph.node[i]['nodedata'].backtrackPath)
+    print "------------------------------------------------"
+
+def printBackTrackPath(path):
+    for entity in path:
+        print entity,
+
+'''
 def printNodes(graph):
     numberofnodes = graph.number_of_nodes()
     for i in range(numberofnodes):
-        #print i ,graph.node[i]['nodedata'].backtrackPath
+        print i ,graph.node[i]['nodedata'].backtrackPath
         pass
-
+'''
 def printEdges(graph):
     edges = graph.edges()
     numEdges = len(edges)
     for i in range(numEdges):
         source = edges[i][0]
         dest = edges[i][1]
-        #print edges[i], graph[source][dest]
+        print edges[i], graph[source][dest]
 
 def returnJsonGraph(graph):
     jsonDataFile = open("jsonDataFile.txt", "w")
@@ -378,10 +391,9 @@ def addGraphNode(newNode, curNode, driver, fsm, entity):
     newNode.backtrackPath.append(entity)
 
     existNodeNumber = fsm.checkNodeExists(newNode.domString)
-
+    header = printRequest()
     if existNodeNumber == -1:
         nodeNumber = fsm.numberOfNodes()
-        header = printRequest()
         print "========================="
         print header
         print "========================="
@@ -400,12 +412,14 @@ def addGraphNode(newNode, curNode, driver, fsm, entity):
         print nodeNumber, newNode.clickables
         time.sleep(1.5)
         driver.save_screenshot("snaps/" + str(nodeNumber) + ".png")
+        clearContent()
         return nodeNumber
         #queue.put(nodeNumber)
     else:
         logger.info("Dom Tree Already Exist")
         #driver.save_screenshot("snaps/" + str(existNodeNumber) + ".png")
-        fsm.addEdges(curNode, existNodeNumber, entity)
+        fsm.addEdges(curNode, existNodeNumber, entity, header)
+        clearContent()
         return -1
     #WebDriverWait(driver, 2000)
     #driver.back()
