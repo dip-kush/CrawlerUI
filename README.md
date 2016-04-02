@@ -10,9 +10,9 @@ Use the requirement file to install the dependency file
 
 ### Instruction for using the sample_web_application
 
-Copy the sample_web_application and paste in the xampp server 
+Copy the login application and paste in the xampp server 
 
-and import the sample_web_application/forum.sql into the database
+and import the login/forum.sql into the database
 
 ###Usage
 
