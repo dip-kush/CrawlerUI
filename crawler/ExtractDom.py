@@ -7,6 +7,9 @@ from BeautifulSoup import BeautifulSoup
 from logger import LoggerHandler, printRequest, clearContent
 from selenium.webdriver.common.proxy import *
 import time
+import HTMLParser
+
+h = HTMLParser.HTMLParser()
 logger = LoggerHandler(__name__)
 
 
@@ -45,6 +48,7 @@ class Globals:
     def addBaseAddress(self, baseAddress):
         self.baseAddress = baseAddress
 
+
 def doLogin(login_url, driver, scriptFilePath=None, scriptFileHandler=None):
     print "doing login"
     print login_url
@@ -55,9 +59,9 @@ def doLogin(login_url, driver, scriptFilePath=None, scriptFileHandler=None):
     print "========================="
     time.sleep(2)
     clearContent()
-   
+
     if scriptFilePath:
-        f = open("login_script.html")
+        f = open(scriptFilePath)
     else:
         f = scriptFileHandler
     bs = BeautifulSoup(f)
@@ -68,13 +72,14 @@ def doLogin(login_url, driver, scriptFilePath=None, scriptFileHandler=None):
         type = l[i].findAll("td")[0].text
         target = l[i].findAll("td")[1].text
         value = l[i].findAll("td")[2].text
-        print type, target, value
+        #print type, target, value
         if value == "" and type == "clickAndWait":
-            element = driver.find_element_by_xpath(
-            "(//input[@type='submit'])")
-            element.click()
+            findSelector(driver,type,target,value)
+            #element = driver.find_element_by_xpath(
+            #"(//input[@type='submit'])")
+            #element.click()
         elif value != "":
-            print value
+            #print value
             target = str(target)
             index = str(target).find('=')
             type = target[0:index]
@@ -94,6 +99,25 @@ def doLogin(login_url, driver, scriptFilePath=None, scriptFileHandler=None):
     clearContent()
     return (start_header, login_header)
         
+ 
+
+
+def findSelector(driver, type,target,value):
+    target = str(target)
+    index = str(target).find('=')
+    type = target[0:index]
+    fieldVal = target[index + 1:]
+    fieldVal = h.unescape(fieldVal)
+    print fieldVal
+    if type == "id":
+        driver.find_element_by_id(fieldVal).click()
+    elif type == "name":
+        driver.find_element_by_name(fieldVal).click()
+    elif type == "css":
+        driver.find_element_by_css_selector(fieldVal).click()
+    else:
+        driver.find_element_by_xpath(fieldVal).click()
+
 
 
 def initializeParams(crawling_spec):

@@ -155,11 +155,14 @@ def executeWorkflows(crawl_id):
         links = Link.objects.filter(wflow_id=wflow).order_by("order_id")
          #links.sort(key=lambda x:x.order_id)
         if startHeader.login_url_header:
-            print headerSplit(startHeader.login_url_header)
+            header = headerSplit(startHeader.login_url_header)
+            print header
         else:
-            print headerSplit(startHeader.start_url_header)    
+            header = headerSplit(startHeader.start_url_header)    
+            print header
         for link in links:
-            print headerSplit(link.header)
+            header =  headerSplit(link.header)
+            print header 
             #print header
 
   
