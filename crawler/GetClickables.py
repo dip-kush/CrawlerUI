@@ -83,7 +83,13 @@ def GetClickables(domString):
         path+=str(clickable.name)
         for key in attrs:
             #print attr
-            path += "[@"+str(key)+"="+'"'+str(attrs[key])+'"'+"]"
+            attrVal = attrs[key]
+            value = ""
+            if type(attrVal) == list: 
+                value = ' '.join(attrVal)
+            else:
+                value = attrVal
+            path += "[@"+str(key)+"="+'"'+value+'"'+"]"
         #print path
         #print attrs
         clickableEntity = ClickableEntity(clickable.name, clickable.attrs, path)

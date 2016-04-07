@@ -70,42 +70,20 @@ def drawGraph(fsm):
 def backtrack(driver, fsm, node, formValues, tillEnd):
     logger.info("Doing backtrack")
     #driver.back()
-    '''
-    if fsm.doBacktrack == False:
-        driver.back()
-    else:
-    '''
+    #if fsm.doBacktrack == False:
+        #driver.back()
+    #else:
+    
     graph = fsm.graph
     path = graph.node[node]['nodedata'].backtrackPath
     driver.get(path[0])
-    '''
-    for i in range(1,len(path)):
-        print path[i].tag, path[i].attr, path[i].attrVal
-    '''
     for i in range(1, len(path)-1+tillEnd):
-        '''
-        if i==1:
-            driver.switch_to.parent_frame()
-            driver.switch_to.frame(driver.find_element_by_name("menu"))
-        '''
         time.sleep(0.5)
         fillFormValues(formValues, driver)
         time.sleep(0.5)
         #action, target= path[i].split(":")
-        '''
-        if tag == "a":
-            driver.find_element_by_xpath("//"+tag+"[@"+attr+"='" + attrVal + "']").click()
-        elif tag == "input":
-            element = driver.find_element_by_xpath("(//"+tag+"[@"+attr+"='"+attrVal+"'])[" + str(tagNumber) + "]")
-            element.click()
-        '''
         driver.find_element_by_xpath(path[i].xpath).click()
-        '''
-        if i==1:
-            driver.switch_to.parent_frame()
-            driver.switch_to.frame(driver.find_element_by_name("body"))
-        time.sleep(1.0)
-        '''
+    
     clearContent()
 
 def AcceptAlert(driver):
@@ -283,6 +261,7 @@ def checkForBannedUrls(attrs, globalVariables, currentPath):
         combinedUrl = baseAddress+parsed.path
     else:
         combinedUrl = parsed.hostname+parsed.path
+    print "combine url ", combinedUrl
     for item in scopeUrls:
         if item in combinedUrl:
             flag = 1

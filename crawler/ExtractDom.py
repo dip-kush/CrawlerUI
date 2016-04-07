@@ -192,7 +192,6 @@ def initializeParams(crawling_spec):
         driver,
         globalVariables,0, start_header, login_header)
 
-
     #assert "Welcome, " in driver.page_source
     driver.close()
 

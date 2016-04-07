@@ -72,7 +72,13 @@ def getDomDiff(parentDom, childDom):
 def traverseDom(domString):
     out = StringIO()
     domString = str(tidy.parseString(domString))
-    domString = clean_html(domString)
+    try:    
+        domString = clean_html(domString)
+    except Exception as e:
+        print e
+        f = open("error", "w")
+        f.write(domString)
+        f.close()
     tree   = etree.HTML(domString.replace('\r', ''))
     domString = '\n'.join([ etree.tostring(stree, pretty_print=True, method="xml")
                           for stree in tree ])

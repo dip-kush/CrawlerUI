@@ -98,6 +98,10 @@ def printRequest():
 
 
 def clearContent():
-    path = "/home/deepak/programs/proxy/requests.txt"
-    f = open(path, "w")
+    try:
+        path = "/home/deepak/programs/proxy/requests.txt"
+        f = open(path, "w")
+    except Exception as e:
+        print e
+
 
