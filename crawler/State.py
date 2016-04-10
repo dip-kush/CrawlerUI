@@ -32,7 +32,7 @@ class StateMachine:
         self.start_dom = ""
         self.login_header = ""
         self.login_dom = ""
-
+        self.criticalStates = []
 
     def addNode(self, number, data):
         '''
@@ -85,6 +85,9 @@ class StateMachine:
         self.start_header = start_header
         self.login_header = login_header
         self.login_dom = domString 
+    
+    def addCriticalState(self, curNode):
+        self.criticalStates.append(curNode)
 '''
 
 n1=NodeData()

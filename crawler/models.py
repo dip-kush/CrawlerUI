@@ -19,6 +19,7 @@ class Crawl(models.Model):
 class Workflow(models.Model):
     scan_id = models.ForeignKey(Crawl)
     wflow_no = models.IntegerField()
+    critical = models.BooleanField(default=False)
     def __str__(self):
         return str(self.wflow_no)
    
@@ -45,6 +46,7 @@ class Link(models.Model):
     link = models.CharField(max_length=200, default="")
     order_id = models.IntegerField()
     header = models.CharField(max_length=500, default="")
+    critical_node = models.BooleanField(default=False)
     #method = models.CharField(max_length="200",default="")
     #url = models.CharField(max_length="200",default="")
     #data = models.CharField(max_length="200", default="")

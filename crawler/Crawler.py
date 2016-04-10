@@ -8,6 +8,7 @@ from GetClickables import getLinks, frameExists, getSubmitButtons,GetClickables
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.alert import Alert
 from State import StateMachine, NodeData
+from BeautifulSoup import BeautifulSoup
 from DomComparator import getDomDiff
 from FormExtractor import getSubmitButtonNumber, fillFormValues
 from logger import LoggerHandler, printRequest, clearContent
@@ -51,6 +52,7 @@ def drawGraph(fsm):
     graph = fsm.graph
     printEdges(graph)
     printNodes(graph)
+    print fsm.criticalStates
     graphJson = returnJsonGraph(graph)
     print fsm.doBacktrack
     logger.info("Number of Node Found %s" % (fsm.numberOfNodes()))
@@ -165,9 +167,12 @@ def Crawl(curNode, fsm, driver, globalVariables, depth):
     #print driver.page_source
     #print clickables
     domString = graph.node[curNode]['nodedata'].domString
+    critical = checkCriticalState(domString)
+    if critical:
+        fsm.addCriticalState(curNode)
     logger.info("Clicking All Clickables to get a New State")
     for entity in clickables:
-
+        #print entity.xpath
         if entity.tag == "a" and entity.attrs.has_key('href'):
 
             if checkForBannedUrls(
@@ -196,6 +201,7 @@ def Crawl(curNode, fsm, driver, globalVariables, depth):
         # add the Node checking if the node already exists
         nodeNumber = addGraphNode(newNode,curNode,driver,fsm,entity)
         if nodeNumber != -1:
+            print "crawling at depth ", str(depth+1)
             Crawl(nodeNumber, fsm, driver, globalVariables, depth+1)
         else:
             logger.info("going back click")
@@ -242,6 +248,13 @@ def Crawl(curNode, fsm, driver, globalVariables, depth):
     #print driver.page_source
 
 
+
+def checkCriticalState(domString):
+    soup = BeautifulSoup(domString)
+    elements = soup.findAll('input', {'type':'password'})   
+    if elements:
+        return True
+    return False
 
 
 def checkForBannedUrls(attrs, globalVariables, currentPath):
@@ -379,7 +392,9 @@ def addGraphNode(newNode, curNode, driver, fsm, entity):
         nodeNumber = fsm.numberOfNodes()
         newNode.insertedDom = getDomDiff(graph.node[curNode]['nodedata'].domString,newNode.domString)
 
-        newNode.clickables = GetClickables(newNode.insertedDom)
+
+        newNode.clickables = GetClickables(newNode.domString)
+        #newNode.clickables = GetClickables(newNode.insertedDom)
         #print newNode.insertedDom
         #write code here
         fsm.addNode(nodeNumber, newNode)
@@ -389,6 +404,9 @@ def addGraphNode(newNode, curNode, driver, fsm, entity):
             "Adding a Edge from Node %d and %d" %
             (curNode, nodeNumber))
         print nodeNumber, newNode.clickables
+        c = newNode.clickables
+        for item in c:
+            print item.xpath
         time.sleep(1.5)
         driver.save_screenshot("snaps/" + str(nodeNumber) + ".png")
         clearContent()

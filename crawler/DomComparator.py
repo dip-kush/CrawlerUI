@@ -71,7 +71,9 @@ def getDomDiff(parentDom, childDom):
 
 def traverseDom(domString):
     out = StringIO()
-    domString = str(tidy.parseString(domString))
+    #domString1 = "" 
+    #domString = str(tidy.parseString(domString))
+    
     try:    
         domString = clean_html(domString)
     except Exception as e:
@@ -79,11 +81,14 @@ def traverseDom(domString):
         f = open("error", "w")
         f.write(domString)
         f.close()
+     
+    #print domString
     tree   = etree.HTML(domString.replace('\r', ''))
     domString = '\n'.join([ etree.tostring(stree, pretty_print=True, method="xml")
                           for stree in tree ])
     tagCount = 0
     dom = xml.dom.minidom.parseString(domString)
+    #print dom
     q = Queue()
     nodes = dom.childNodes
 

@@ -23,6 +23,7 @@ def getFormFieldValue(filePath, fileHandler=None):
         else:
             file = open(filePath).read()
         bs = BeautifulSoup(file)
+        print bs
         #print "BeautifulSoup"
         #print bs
         l = bs.findAll("tr")
@@ -51,6 +52,7 @@ def getFormFieldValue(filePath, fileHandler=None):
         logger.error("Value Error {}".format(e))
     except:
         logger.error(sys.exc_info())
+    print formFieldsValues
     return formFieldsValues
 
 def fillFormValues(formFieldValues, driver):

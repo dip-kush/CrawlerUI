@@ -9,7 +9,7 @@ from header import Header
 import networkx as nx
 import urllib2
 import json,os
-
+import requests
 # Create your views here.
 
 def launch(request):
@@ -41,11 +41,17 @@ def crawlingController(request):
         crawling_spec["wait_time"] = request.POST.get('wait-time', "")
         crawling_spec["depth"] = request.POST.get('depth', "100")
         #print crawling_spec
-        data = ""
+        login_data = ""
+        form_data = ""
         lines = crawling_spec['login_script'].readlines()
         for line in lines:
-            data = data+line.strip()
-        bs =  BeautifulSoup(data)
+            login_data = login_data+line.strip()
+        lines = crawling_spec['form_values_script'].readlines()
+        for line in lines:
+            form_data = form_data+line.strip()
+
+        bs =  BeautifulSoup(form_data)
+        print bs
         #print bs.findAll("tr") 
         obj = Crawl(login_script =  crawling_spec["login_script"], login_url = crawling_spec["login_url"] , \
                                     form_values_script = crawling_spec["form_values_script"] , \
@@ -56,7 +62,8 @@ def crawlingController(request):
                                     depth = crawling_spec["depth"])
         #print login_script, login_url, form_values_script, base_address, start_url, black_list_urls, scope_urls, wait_time
         obj.save()
-        crawling_spec["login_script"] = data
+        crawling_spec["login_script"] = login_data
+        crawling_spec["form_values_script"] = form_data
         fsm = initializeParams(crawling_spec)
         #print graph
         return HttpResponse("Do something")
@@ -85,6 +92,8 @@ def runcrawl(request):
 
 def pathSourcetoSink(fsm,crawl,url):
         graph = fsm.graph
+        criticalStates = fsm.criticalStates
+        
         sink_nodes = [node for node, outdegree in graph.out_degree
                         (graph.nodes()).items() if outdegree == 0]
         source_nodes = [node for node, indegree in graph.in_degree
@@ -98,16 +107,25 @@ def pathSourcetoSink(fsm,crawl,url):
                     print path
                     obj = Workflow(scan_id=crawl,wflow_no = wflow_no) 
                     obj.save()
+                    critical = False
+                    critical_path = False
                     for i in range(len(path)-1):
                         #print path[i]
+                        critical = False
                         link = graph.edge[path[i]][path[i+1]][0]["event"].xpath
                         header = graph.edge[path[i]][path[i+1]][0]["header"] 
                         dom = graph.node[path[i+1]]['nodedata'].domString
                         wflow = Workflow.objects.get(scan_id=crawl,wflow_no = wflow_no)
+                        if path[i+1] in criticalStates:
+                            critical = True
+                            critical_path = True        
                         #print wflow.wflow_no
-                        linkobj = Link(wflow_id = wflow, link = link, order_id = i+1,header=header, response_dom=dom)
+                        linkobj = Link(wflow_id = wflow, link = link, order_id = i+1,header=header, response_dom=dom, critical_node=critical)
                         linkobj.save()
                         print graph.edge[path[i]][path[i+1]][0]["event"].xpath
+                    if critical_path==True:
+                        obj.critical = True
+                        obj.save()
                     wflow_no+=1    
         start_url_header = fsm.start_header
         login_url_header = fsm.login_header
@@ -140,34 +158,72 @@ def readJsonDataFile(request):
 def getWorkflow(request):
     if request.method == "GET":
         id_val = request.GET["id"]
-        executeWorkflows(id_val)
+        getWorkflows(int(id_val))
     return HttpResponse("success")
 
 
-def executeWorkflows(crawl_id):
+def executeWorkflows(workflows):
+    for num,wflow in enumerate(workflows):
+        s = requests.Session()
+        flag = False
+        print "Executing Workflow", num+1
+        for order, req in enumerate(wflow):
+            if req.critical == False:
+                print "Executing Request",order+1 
+                if req.method == "GET":
+                    r = s.get(req.url, data=req.data)
+                elif req.method == "POST":  
+                    r = s.post(req.url, data=req.data)
+                print r.text==req.dom
+                print "===================================="
+                print r.text
+                print "====================================="
+                #print req.dom
+                       
+        '''
+                if r.text != req.dom:
+                    flag = True
+                    print "it's correct"
+        
+        if flag:
+            print "No Sequence Violation"
+        else:
+            print "Sequence Violation"    
+        '''
+    
+def getWorkflows(crawl_id):
     #crawl_id = 1
     workflows = []
     crawl_obj =  Crawl.objects.get(id=crawl_id)
     startHeader =  StartHeader.objects.get(scan_id=crawl_obj)
-    wflows = Workflow.objects.filter(scan_id=crawl_obj)
-    for wflow in wflows:
-        print wflow
-        links = Link.objects.filter(wflow_id=wflow).order_by("order_id")
-         #links.sort(key=lambda x:x.order_id)
-        if startHeader.login_url_header:
-            header = headerSplit(startHeader.login_url_header)
-            print header
-        else:
-            header = headerSplit(startHeader.start_url_header)    
-            print header
-        for link in links:
-            header =  headerSplit(link.header)
-            print header 
-            #print header
-
-  
+    wflows_obj = Workflow.objects.filter(scan_id=crawl_obj, critical=True)
     
-
+    for wf in wflows_obj:
+        wflow = []
+        links = Link.objects.filter(wflow_id=wf).order_by("order_id")
+        #links.sort(key=lambda x:x.order_id)
+        if startHeader.login_url_header:
+            header = headerSplit(startHeader.login_url_header, False, startHeader.login_dom)
+            wflow.append(header)
+            #print header
+        else:
+            header = headerSplit(startHeader.start_url_header, False, startHeader.login_dom) 
+            wflow.append(header)   
+            #print header
+        for link in links:
+            header =  headerSplit(link.header, link.critical_node, link.response_dom)
+            wflow.append(header)
+            #print header 
+        workflows.append(wflow)
+    printWorkflows(workflows) 
+    executeWorkflows(workflows)
+   
+def printWorkflows(workflows):    
+    for i,wflow in enumerate(workflows):
+        print i+1
+        for item in wflow:
+            print item
+            
 
 
 def makePayload(data):
@@ -182,7 +238,7 @@ def makePayload(data):
     return dataDict
 
 
-def headerSplit(header):
+def headerSplit(header, critical, dom):
     method = ""
     url = ""
     cookie = ""
@@ -196,7 +252,7 @@ def headerSplit(header):
         item = item.split(": ")
         if item[0] == "Cookie":    
             cookie = item[1]
-    header = Header(method,url,cookie,data) 
+    header = Header(method,url,cookie,data, critical,dom) 
     return header    
 
 
