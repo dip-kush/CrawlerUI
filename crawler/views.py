@@ -215,8 +215,9 @@ def getWorkflows(crawl_id):
             wflow.append(header)
             #print header 
         workflows.append(wflow)
-    printWorkflows(workflows) 
-    executeWorkflows(workflows)
+    return workflows
+    #printWorkflows(workflows) 
+    #executeWorkflows(workflows)
    
 def printWorkflows(workflows):    
     for i,wflow in enumerate(workflows):

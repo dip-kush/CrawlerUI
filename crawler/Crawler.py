@@ -392,9 +392,10 @@ def addGraphNode(newNode, curNode, driver, fsm, entity):
         nodeNumber = fsm.numberOfNodes()
         newNode.insertedDom = getDomDiff(graph.node[curNode]['nodedata'].domString,newNode.domString)
 
-
-        newNode.clickables = GetClickables(newNode.domString)
-        #newNode.clickables = GetClickables(newNode.insertedDom)
+        if curNodeUrl == newNodeUrl:
+            newNode.clickables = GetClickables(newNode.insertedDom)
+        else:
+            newNode.clickables = GetClickables(newNode.domString)
         #print newNode.insertedDom
         #write code here
         fsm.addNode(nodeNumber, newNode)
