@@ -140,7 +140,6 @@ def initializeParams(crawling_spec):
     })
 
     driver = webdriver.Firefox(proxy = proxy)
-
     #driver = webdriver.Chrome()
     logger.info("Browser is Launched")
     #driver.get("http://127.0.0.1:81/login/login.php")

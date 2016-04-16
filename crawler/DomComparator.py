@@ -27,7 +27,7 @@ def checkExistState(dom1,dom2):
     else:
         tagCount1, strippedDom1 = traverseDom(dom1)
         tagCount2, strippedDom2 = traverseDom(dom2)
-        #print "ALL tag count %d %d" % (tagCount1, tagCount2)
+        
         mintagCount = min(tagCount1,tagCount2)
         maxtagCount = max(tagCount1,tagCount2)
         if float(mintagCount)/float(maxtagCount) < 0.9:

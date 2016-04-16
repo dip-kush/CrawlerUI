@@ -2,14 +2,14 @@ import xml.dom.minidom
 from Queue import *
 
 
-def htmlcompare(document1,document2,document3):
+def htmlcompare(document1,document2):
     dom1=xml.dom.minidom.parseString(document1)
-    #dom2=xml.dom.minidom.parseString(document2)
-    dom3=xml.dom.minidom.parseString(document3)
+    dom2=xml.dom.minidom.parseString(document2)
+    #dom3=xml.dom.minidom.parseString(document3)
     root1=dom1.childNodes[0]
-    #root2=dom2.childNodes[0]
-    root3=dom3.childNodes[0]
-
+    root2=dom2.childNodes[0]
+    #root3=dom3.childNodes[0]
+    '''
     if document2 is not None:
     	dom2=xml.dom.minidom.parseString(document2)
     	root2=dom2.childNodes[0]
@@ -61,17 +61,17 @@ def htmlcompare(document1,document2,document3):
                         break
                     i=i+1
                 if  flg==1:
-                    break
-                   
+                   break
+    '''               
     #finding vuln
     flg = 0
     if flg==0:
         flg=0
         q1=Queue()
         q2=Queue()
-        if(root1.nodeName==root3.nodeName):
+        if(root1.nodeName==root2.nodeName):
             q1.put(root1)
-            q2.put(root3)
+            q2.put(root2)
         else:
             flg=1
         while(q1.empty()==False and q2.empty()==False):
@@ -105,10 +105,10 @@ def htmlcompare(document1,document2,document3):
                 if flg==1:
                     break
         if flg==0:
-        	#return 1
+            return 1
             print('no vuln')
         else:
-        	#return 0	
+            return 0	
             print('vuln')
 
 benign1="<html><head><title>Title1</title></head><body><b>Hi</b><a href='a'></a><p>hello1</p></body></html>"

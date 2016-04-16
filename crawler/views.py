@@ -4,7 +4,10 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from ExtractDom import initializeParams
 from BeautifulSoup import BeautifulSoup
+from lxml import etree
+from lxml.html.clean import clean_html
 from models import Crawl, Workflow, Link, StartHeader
+from response_comparator import htmlcompare
 from header import Header
 import networkx as nx
 import urllib2
@@ -154,7 +157,14 @@ def readJsonDataFile(request):
     for line in lines:
         data = data+line.strip()
     return HttpResponse(json.dumps({'jsondata': data}))
-     
+    
+def cleanCode(domString):
+    domString = clean_html(domString)
+    tree   = etree.HTML(domString.replace('\r', ''))
+    domString = '\n'.join([ etree.tostring(stree, pretty_print=True, method="xml")
+                          for stree in tree ])
+    return domString
+ 
 def getWorkflow(request):
     if request.method == "GET":
         id_val = request.GET["id"]
@@ -174,7 +184,7 @@ def executeWorkflows(workflows):
                     r = s.get(req.url, data=req.data)
                 elif req.method == "POST":  
                     r = s.post(req.url, data=req.data)
-                print r.text==req.dom
+                print htmlcompare(cleanCode(req.dom),cleanCode(req.dom))
                 print "===================================="
                 print r.text
                 print "====================================="
@@ -215,9 +225,9 @@ def getWorkflows(crawl_id):
             wflow.append(header)
             #print header 
         workflows.append(wflow)
-    return workflows
-    #printWorkflows(workflows) 
-    #executeWorkflows(workflows)
+    #return workflows
+    printWorkflows(workflows) 
+    executeWorkflows(workflows)
    
 def printWorkflows(workflows):    
     for i,wflow in enumerate(workflows):

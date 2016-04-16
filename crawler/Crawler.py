@@ -65,7 +65,7 @@ def drawGraph(fsm):
     nx.draw_networkx_labels(graph, pos, labels)
     #nx.draw_networkx_labels( graph ,pos, labels)
     #nx.draw(graph,node_size=3000,nodelist=graph.nodes(),node_color='b')
-    #plt.show()
+    plt.show()
 
 
 
