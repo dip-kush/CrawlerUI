@@ -3,13 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head profile="http://selenium-ide.openqa.org/profiles/test-case">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link rel="selenium.base" href="http://localhost:81/login/page.php" />
-<title>submit_form2</title>
+<link rel="selenium.base" href="http://127.0.0.1:81/login" />
+<title>hello</title>
 </head>
 <body>
 <table cellpadding="1" cellspacing="1" border="1">
 <thead>
-<tr><td rowspan="1" colspan="3">submit_form2</td></tr>
+<tr><td rowspan="1" colspan="3">hello</td></tr>
 </thead><tbody>
 <tr>
 	<td>open</td>
@@ -18,23 +18,28 @@
 </tr>
 <tr>
 	<td>type</td>
-	<td>xpath=(//input[@id='name'])[2]</td>
-	<td>vishal</td>
-</tr>
-<tr>
-	<td>clickAndWait</td>
-	<td>//input[@value='submit']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>type</td>
 	<td>id=name</td>
-	<td>vishal</td>
+	<td>hello</td>
 </tr>
 <tr>
 	<td>type</td>
 	<td>name=fb</td>
-	<td>hello </td>
+	<td>world </td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=form &gt; #ignore</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=ignore</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=pass</td>
+	<td>deepakkool</td>
 </tr>
 <tr>
 	<td>clickAndWait</td>

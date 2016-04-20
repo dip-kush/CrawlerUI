@@ -22,13 +22,27 @@ def launch(request):
         crawl_list.append({'id': run.id, 'base_address': run.base_address, 'start_url': run.start_url, 'scope_urls': run.scope_urls})
     return render(request, "index.html", {'crawl_list': crawl_list})
 
+def runResult(request):
+    return render(request, 'wflow.html')
+
+def allLogs(request):
+    end_signal = 0
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+    path = os.path.join(BASE_DIR, 'crawling.log')
+    print path
+    f = open(path)
+    lines =  f.readlines()
+    for line in lines:
+        line = line.strip()
+    return render(request, "log.html", {"log": lines})
 
 
 
 def showGraph(request):
     return render(request, "graph.html")
 
-
+def error(request):
+    pass
 
 def crawlingController(request):
     crawling_spec = {}
@@ -43,6 +57,7 @@ def crawlingController(request):
         crawling_spec["scope_urls"] = request.POST.get('scope-urls', "")
         crawling_spec["wait_time"] = request.POST.get('wait-time', "")
         crawling_spec["depth"] = request.POST.get('depth', "100")
+        #crawling_spec["proxy_address"] = request.POST.get('proxy-address', "")
         #print crawling_spec
         login_data = ""
         form_data = ""
@@ -63,37 +78,134 @@ def crawlingController(request):
                                     scope_urls =  crawling_spec["scope_urls"], \
                                     wait_time =  crawling_spec["wait_time"], \
                                     depth = crawling_spec["depth"])
+                                    #proxy_address = crawling_spec["proxy_address"])
         #print login_script, login_url, form_values_script, base_address, start_url, black_list_urls, scope_urls, wait_time
         obj.save()
         crawling_spec["login_script"] = login_data
         crawling_spec["form_values_script"] = form_data
         fsm = initializeParams(crawling_spec)
+        #pathSourcetoSink(fsm, crawl, crawl.login_url)
         #print graph
-        return HttpResponse("Do something")
+        if fsm:
+            returnJsonGraph(fsm.graph)
+            number_of_nodes = fsm.graph.number_of_nodes()
+            number_of_edges = len(fsm.graph.edges())
+            nodes = getNodes(fsm.graph)
+            edges = getEdges(fsm.graph)
+            crawl = Crawl.objects.latest("id")
+            pathSourcetoSink(fsm, crawl)    
+            print crawl.id
+            workflows = getWfs(crawl.id)
+            print "workflows"
+            print workflows
+            #print edges
+            #print nodes
+            return render(request, 'run.html', {'num_nodes': number_of_nodes,'num_edges':number_of_edges, 'nodes': nodes, 'edges': edges, 'workflows': workflows})
+        else:
+            return render(request, "error.html") 
+
+
+def getNodes(graph):
+    numberofnodes = graph.number_of_nodes()
+    node_list = []
+    for i in range(numberofnodes):
+        node_dict = {}
+        node_dict["num"] = i
+        node_dict["path"] = printBackTrackPath(graph.node[i]['nodedata'].backtrackPath)
+        node_list.append(node_dict)
+    return node_list
+
+def printBackTrackPath(path):
+    fullpath = ""
+    for entity in path:
+        fullpath+=str(entity)
+        fullpath+=" "
+    return fullpath
+
+
+def getEdges(graph):
+    edge_list = []
+    edges = graph.edges()
+    numEdges = len(edges)
+    for i in range(numEdges):       
+        edge_dict = {}
+        source = edges[i][0]
+        dest = edges[i][1]
+        edge_dict["edge"] = str(edges[i])
+        edge_dict["info"] = str(graph[source][dest])
+        edge_list.append(edge_dict)
+    return edge_list
+
+
+def returnJsonGraph(graph):
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+    path = os.path.join(BASE_DIR, 'static/jsonDataFile.txt')
+    jsonDataFile = open(path, "w")
+    graphData = {}
+    graphData["nodes"] = []
+    graphData["links"] = []
+    numberofnodes = graph.number_of_nodes()
+    for i in range(numberofnodes):
+        newNodeDict = {}
+        newNodeDict["name"] = i
+        newNodeDict["group"] = 1
+        graphData["nodes"].append(newNodeDict)
+    edges = graph.edges()
+    numEdges = len(edges)
+    for i in range(numEdges):
+        source = edges[i][0]
+        dest = edges[i][1]
+        newLinkDict = {
+        "source": source,
+        "target": dest,
+        "value": 50
+        }
+        graphData["links"].append(newLinkDict)
+    data = json.dumps(graphData)
+    jsonDataFile.write(data)
+    jsonDataFile.close()
+    #print data
 
 
 def runcrawl(request):
     print "request"
     crawl_spec_dict = {}
-    if request.is_ajax():
-        if request.method == 'POST':
-        #id_val = 1
-            id_val = request.POST['id']
-            crawl = Crawl.objects.get(id=id_val)
-            print crawl
-            crawl_spec_dict = {"login_script": crawl.login_script, "login_url": crawl.login_url, \
-                                "form_values_script": crawl.form_values_script, "base_address": crawl.base_address, \
-                                "start_url": crawl.start_url, "black_list_urls":crawl.black_list_urls, \
-                                "scope_urls":crawl.scope_urls, "wait_time": crawl.wait_time, "depth":crawl.depth}
-            print crawl_spec_dict
-            fsm = initializeParams(crawl_spec_dict)
-            print "graph object",fsm.graph.nodes()
-            pathSourcetoSink(fsm, crawl, crawl.login_url)
-            return HttpResponse(json.dumps({'success': 1}))
-    #retur HttpResponse(json.dumps({'success': 0}))
+    #if request.is_ajax():
+    if request.method == 'GET':
+    #id_val = 1
+        id_val = request.GET['id']
+        crawl = Crawl.objects.get(id=id_val)
+        print crawl
+        crawl_spec_dict = {"login_script": crawl.login_script, "login_url": crawl.login_url, \
+                            "form_values_script": crawl.form_values_script, "base_address": crawl.base_address, \
+                            "start_url": crawl.start_url, "black_list_urls":crawl.black_list_urls, \
+                            "scope_urls":crawl.scope_urls, "wait_time": crawl.wait_time, "depth":crawl.depth } 
+                            #"proxy_address": crawl.proxy_address}
+        print crawl_spec_dict
+        fsm = initializeParams(crawl_spec_dict)
+        #print "graph object",fsm.graph.nodes()
+        #pathSourcetoSink(fsm, crawl)
+        if fsm:
+            number_of_nodes = fsm.graph.number_of_nodes()
+            number_of_edges = len(fsm.graph.edges())
+            nodes = getNodes(fsm.graph)
+            edges = getEdges(fsm.graph)
+            crawl = Crawl.objects.latest("id")
+            #pathSourcetoSink(fsm, crawl)
+            print crawl.id
+            workflows = getWfs(crawl.id)
+            print "workflows"
+            print workflows
+            #print edges
+            #print nodes
+            return render(request, 'run.html', {'num_nodes': number_of_nodes,'num_edges':number_of_edges, 'nodes': nodes, 'edges': edges, 'workflows': workflows})
+        else:
+            return render(request, "error.html")            
+        #return HttpResponse(json.dumps({'success': 1}))
+#retur HttpResponse(json.dumps({'success': 0}))
 
 
-def pathSourcetoSink(fsm,crawl,url):
+def pathSourcetoSink(fsm,crawl):
         graph = fsm.graph
         criticalStates = fsm.criticalStates
         
@@ -165,51 +277,72 @@ def cleanCode(domString):
                           for stree in tree ])
     return domString
  
-def getWorkflow(request):
+def getWorkflow(request):    
+    vulnerable_wflows= []
     if request.method == "GET":
         id_val = request.GET["id"]
-        getWorkflows(int(id_val))
-    return HttpResponse("success")
+        crawl_obj, vulnerable_wflows = getWorkflows(int(id_val), True)
+    if vulnerable_wflows:
+        return render(request, "wflow.html", {"crawl_obj": crawl_obj, "vwflows": vulnerable_wflows})
+    else:
+        return render(request, "wflow.html")        
 
 
 def executeWorkflows(workflows):
-    for num,wflow in enumerate(workflows):
+    vulnerable_wflows = []
+    for wf_obj,wflow in workflows:
         s = requests.Session()
-        flag = False
-        print "Executing Workflow", num+1
+        print "Executing Workflow", wf_obj.wflow_no
         for order, req in enumerate(wflow):
+            flag = False
             if req.critical == False:
                 print "Executing Request",order+1 
                 if req.method == "GET":
                     r = s.get(req.url, data=req.data)
                 elif req.method == "POST":  
                     r = s.post(req.url, data=req.data)
-                print htmlcompare(cleanCode(req.dom),cleanCode(req.dom))
+                print htmlcompare(cleanCode(r.text),cleanCode(req.dom))
                 print "===================================="
-                print r.text
+                #print r.text
                 print "====================================="
                 #print req.dom
-                       
-        '''
-                if r.text != req.dom:
+                
+                             
+                if not htmlcompare(cleanCode(r.text),cleanCode(req.dom)):
                     flag = True
                     print "it's correct"
         
         if flag:
             print "No Sequence Violation"
         else:
+            wf_obj.vulnerable = True
+            wf_obj.save()
+            vulnerable_wflows.append((wf_obj, wflow))
             print "Sequence Violation"    
-        '''
-    
-def getWorkflows(crawl_id):
+
+    return vulnerable_wflows   
+
+
+def getWfs(crawl_id):
+    workflows = []
+    crawl_obj =  Crawl.objects.get(id=crawl_id)
+    startHeader =  StartHeader.objects.get(scan_id=crawl_obj)
+    wflows_obj = Workflow.objects.filter(scan_id=crawl_obj)
+    return wflows_obj
+
+
+
+ 
+def getWorkflows(crawl_id, critical_bool):
     #crawl_id = 1
     workflows = []
     crawl_obj =  Crawl.objects.get(id=crawl_id)
     startHeader =  StartHeader.objects.get(scan_id=crawl_obj)
-    wflows_obj = Workflow.objects.filter(scan_id=crawl_obj, critical=True)
-    
+    wflows_obj = Workflow.objects.filter(scan_id=crawl_obj, critical=critical_bool)
+    print wflows_obj 
     for wf in wflows_obj:
         wflow = []
+        print wf.wflow_no
         links = Link.objects.filter(wflow_id=wf).order_by("order_id")
         #links.sort(key=lambda x:x.order_id)
         if startHeader.login_url_header:
@@ -223,15 +356,18 @@ def getWorkflows(crawl_id):
         for link in links:
             header =  headerSplit(link.header, link.critical_node, link.response_dom)
             wflow.append(header)
-            #print header 
-        workflows.append(wflow)
+            #print header
+        print wf.wflow_no 
+        workflows.append((wf,wflow))
     #return workflows
     printWorkflows(workflows) 
-    executeWorkflows(workflows)
-   
+    vulnerable_wflows = executeWorkflows(workflows)
+    return (crawl_obj,vulnerable_wflows)
+            
+ 
 def printWorkflows(workflows):    
-    for i,wflow in enumerate(workflows):
-        print i+1
+    for wf_obj,wflow, in workflows:
+        print "workflow obj ",wf_obj.wflow_no
         for item in wflow:
             print item
             

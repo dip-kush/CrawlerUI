@@ -1,6 +1,9 @@
 import logging
 import logging.config
 
+
+path = '/home/deepak/programs/proxy/requests.txt' 
+
 '''
 
 logging.config.dictconfig({
@@ -74,7 +77,7 @@ def printRequest():
 
 
 def printRequest():
-    path = "/home/deepak/programs/proxy/requests.txt"
+    #path = "/home/deepak/programs/proxy/requests.txt"
     data = ""
     try:
         f = open(path, "r")
@@ -99,7 +102,7 @@ def printRequest():
 
 def clearContent():
     try:
-        path = "/home/deepak/programs/proxy/requests.txt"
+        #path = "/home/deepak/programs/proxy/requests.txt"
         f = open(path, "w")
     except Exception as e:
         print e

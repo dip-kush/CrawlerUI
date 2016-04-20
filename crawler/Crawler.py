@@ -10,9 +10,9 @@ from selenium.webdriver.common.alert import Alert
 from State import StateMachine, NodeData
 from BeautifulSoup import BeautifulSoup
 from DomComparator import getDomDiff
+from logger import printRequest, clearContent
 from FormExtractor import getSubmitButtonNumber, fillFormValues
-from logger import LoggerHandler, printRequest, clearContent
-
+from logger import LoggerHandler
 
 logger = LoggerHandler(__name__)
 
@@ -35,7 +35,7 @@ def initState(domString, link, title, driver, globalVariables,depth,start_url,lo
         print item.xpath
     node.backtrackPath.append(link)
     fsm.addNode(0, node)
-    driver.save_screenshot("snaps/" + str(0) + ".png")
+    driver.save_screenshot("../static/screenshots/" + str(0) + ".png")
     if frameExists(node.domString):
         logger.info("Crawling Frames")
         crawlFrame(0, fsm, driver, globalVariables)
@@ -53,7 +53,7 @@ def drawGraph(fsm):
     printEdges(graph)
     printNodes(graph)
     print fsm.criticalStates
-    graphJson = returnJsonGraph(graph)
+    #graphJson = returnJsonGraph(graph)
     print fsm.doBacktrack
     logger.info("Number of Node Found %s" % (fsm.numberOfNodes()))
     pos = nx.spring_layout(graph)
@@ -65,11 +65,11 @@ def drawGraph(fsm):
     nx.draw_networkx_labels(graph, pos, labels)
     #nx.draw_networkx_labels( graph ,pos, labels)
     #nx.draw(graph,node_size=3000,nodelist=graph.nodes(),node_color='b')
-    plt.show()
+    #plt.show()
 
 
 
-def backtrack(driver, fsm, node, formValues, tillEnd):
+def backtrack(driver, fsm, node, formValues, tillEnd,path):
     logger.info("Doing backtrack")
     #driver.back()
     #if fsm.doBacktrack == False:
@@ -130,7 +130,7 @@ def crawlFrame(curNode, fsm, driver, globalVariables):
         # code for crawling the body
         newNode = CreateNode(driver)
         # add the Node checking if the node already exists
-        nodeNumber = addGraphNode(newNode,curNode,driver,fsm,entity)
+        nodeNumber = addGraphNode(newNode,curNode,driver,fsm,entity,globalVariable.proxy_address)
 
         if nodeNumber != -1:
             Crawl(nodeNumber, fsm, driver, globalVariables)
@@ -157,7 +157,7 @@ def Crawl(curNode, fsm, driver, globalVariables, depth):
     if depth > globalVariables.depth:
         logger.info("depth exceeded")
         #driver.back()
-        backtrack(driver,fsm,curNode,globalVariables.formFieldValues, 0)
+        backtrack(driver,fsm,curNode,globalVariables.formFieldValues, 0, globalVariables.proxy_address)
         return
     logger.info("crawling in normal mode")
     graph = fsm.graph
@@ -199,13 +199,13 @@ def Crawl(curNode, fsm, driver, globalVariables, depth):
         # make a new node add in the graph and the queue
         newNode = CreateNode(driver)
         # add the Node checking if the node already exists
-        nodeNumber = addGraphNode(newNode,curNode,driver,fsm,entity)
+        nodeNumber = addGraphNode(newNode,curNode,driver,fsm,entity, globalVariables.proxy_address)
         if nodeNumber != -1:
             print "crawling at depth ", str(depth+1)
             Crawl(nodeNumber, fsm, driver, globalVariables, depth+1)
         else:
             logger.info("going back click")
-            backtrack(driver,fsm,curNode,globalVariables.formFieldValues, 1)
+            backtrack(driver,fsm,curNode,globalVariables.formFieldValues, 1, globalVariables.proxy_address)
     #submitButtons = getSubmitButtons(domString)
 
     #submitButtonNumber = getSubmitButtonNumber(domString, driver)
@@ -244,7 +244,7 @@ def Crawl(curNode, fsm, driver, globalVariables, depth):
     WebDriverWait(driver, 2000)
     '''
     WebDriverWait(driver, 2000);
-    backtrack(driver,fsm,curNode,globalVariables.formFieldValues,0)
+    backtrack(driver,fsm,curNode,globalVariables.formFieldValues,0, globalVariables.proxy_address)
     #print driver.page_source
 
 
@@ -326,7 +326,7 @@ def printEdges(graph):
         print edges[i], graph[source][dest]
 
 def returnJsonGraph(graph):
-    jsonDataFile = open("jsonDataFile.txt", "w")
+    jsonDataFile = open("../static/jsonDataFile.txt", "w")
     graphData = {}
     graphData["nodes"] = []
     graphData["links"] = []
@@ -365,7 +365,7 @@ def CreateNode(driver):
     return newNode
 
 
-def addGraphNode(newNode, curNode, driver, fsm, entity):
+def addGraphNode(newNode, curNode, driver, fsm, entity,path):
     '''
     Adding a Node to the Finite State Machine
     Checking if the Dom Tree Does Not Exist Already
@@ -409,7 +409,7 @@ def addGraphNode(newNode, curNode, driver, fsm, entity):
         for item in c:
             print item.xpath
         time.sleep(1.5)
-        driver.save_screenshot("snaps/" + str(nodeNumber) + ".png")
+        driver.save_screenshot("../static/screenshots/" + str(nodeNumber) + ".png")
         clearContent()
         return nodeNumber
         #queue.put(nodeNumber)

@@ -12,6 +12,7 @@ class Crawl(models.Model):
     scope_urls = models.CharField(max_length=100,default=None)
     wait_time = models.CharField(max_length=100,default=None)
     depth = models.CharField(max_length=5, default="100")
+    #proxy_address = models.TextField(max_length=100, default="")
     def __str__(self):
         return str(self.id)
 
@@ -20,10 +21,15 @@ class Workflow(models.Model):
     scan_id = models.ForeignKey(Crawl)
     wflow_no = models.IntegerField()
     critical = models.BooleanField(default=False)
+    vulnerable = models.BooleanField(default=False)
     def __str__(self):
         return str(self.wflow_no)
-   
 
+'''
+class VulnerableFlow(models.Model):
+    wflow = models.ForeignKey(Workflow)
+
+'''
 class StartHeader(models.Model):
     scan_id = models.ForeignKey(Crawl)
     start_url_header = models.CharField(max_length=1000, default="")

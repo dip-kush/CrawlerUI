@@ -4,10 +4,13 @@ from selenium.webdriver.common.keys import Keys
 from Crawler import initState
 from FormExtractor import getFormFieldValue
 from BeautifulSoup import BeautifulSoup
-from logger import LoggerHandler, printRequest, clearContent
+from logger import LoggerHandler
 from selenium.webdriver.common.proxy import *
+from logger import printRequest, clearContent
 import time
 import HTMLParser
+
+
 
 h = HTMLParser.HTMLParser()
 logger = LoggerHandler(__name__)
@@ -25,6 +28,7 @@ class Globals:
         self.waitTime= 0
         self.baseAddress = ""
         self.depth = 100 #infinite depth
+        self.proxy_address = ""
 
     def getFormValues(self, filePath=None, fileHandler=None):
         self.formFieldValues = getFormFieldValue(filePath,fileHandler)
@@ -47,9 +51,13 @@ class Globals:
 
     def addBaseAddress(self, baseAddress):
         self.baseAddress = baseAddress
+    
+    def setProxy(self, address):
+        self.proxy_address = address
 
 
-def doLogin(login_url, driver, scriptFilePath=None, scriptFileHandler=None):
+   
+def doLogin(login_url, driver, path, scriptFilePath=None, scriptFileHandler=None):
     print "doing login"
     print login_url
     driver.get(login_url)
@@ -99,8 +107,39 @@ def doLogin(login_url, driver, scriptFilePath=None, scriptFileHandler=None):
     clearContent()
     return (start_header, login_header)
         
- 
+''' 
+def printRequest(path):
+    #path = "/home/deepak/programs/proxy/requests.txt"
+    data = ""
+    try:
+        f = open(path, "r")
+        data = f.readlines()
+        data = ''.join(data)
+    except Exception as e:
+        print e
+    if data.find("HEADEREND")!=-1:
+        data = data.strip("HEADEREND")
+        headers = data.split("HEADEREND")
+        header = headers[0].strip()
+        header = header.replace("\r", "")
+        header = header.replace("\n\n", "\n")
+        return header
+    else:
+        headers = data.split("RESPONSEHEADERS")
+        header = headers[0].strip()
+        header = header.replace("\r", "")
+        header = header.replace("\n\n", "\n")
+        return header
 
+
+def clearContent(path):
+    try:
+        #path = "/home/deepak/programs/proxy/requests.txt"
+        f = open(path, "w")
+    except Exception as e:
+        print e
+ 
+''' 
 
 def findSelector(driver, type,target,value):
     target = str(target)
@@ -143,6 +182,13 @@ def initializeParams(crawling_spec):
     #driver = webdriver.Chrome()
     logger.info("Browser is Launched")
     #driver.get("http://127.0.0.1:81/login/login.php")
+
+    '''
+    if crawling_spec["proxy_address"]:
+        globalVariables.setProxy(crawling_spec["proxy_address"])
+    '''
+
+
     if crawling_spec["login_url"]:
         login_url = crawling_spec["login_url"]
 
@@ -153,7 +199,7 @@ def initializeParams(crawling_spec):
             logger.error("No Login URL provided")
         else:
             print "performing login"
-            start_header, login_header = doLogin(login_url, driver, scriptFileHandler = crawling_spec["login_script"])
+            start_header, login_header = doLogin(login_url, driver, globalVariables.proxy_address,scriptFileHandler = crawling_spec["login_script"] )
 
     if crawling_spec["form_values_script"]:
         globalVariables.getFormValues(fileHandler = crawling_spec["form_values_script"])
@@ -181,6 +227,8 @@ def initializeParams(crawling_spec):
     if crawling_spec["wait_time"]:
         globalVariables.setGlobalWait(crawling_spec["wait_time"])
 
+
+   
     # time.sleep(5)
     # move the controller to Initiate Crawler Activity
     logger.info("Initiating the Crawler")
@@ -196,6 +244,10 @@ def initializeParams(crawling_spec):
 
     print "graph obj",fsm.graph.nodes()
     return fsm
+
+
+def somefunc():
+    pass
 
 def main():
     '''
@@ -217,12 +269,14 @@ def main():
     parser.add_argument("-bl", "--black-list", action="store", dest="black_list_urls", help="Black List Urls")
     parser.add_argument("-sc", "--scope", action="store", dest="scope_url", help="scope of the crawler")
     parser.add_argument("-d", "--depth", action="store", dest="depth",help="depth of crawl", type=int)
+    parser.add_argument("-p", "--proxy", action="store", dest="proxy_address",help="proxy address")
     parser.add_argument('-t', action="store", dest="time", type=int)
 
     args = parser.parse_args()
 
     globalVariables = Globals()
 
+    proxy_address = ""
     # globalVariables.bannedUrls.append("http://127.0.0.1:81/login/profile.html")
 
     #driver = webdriver.PhantomJS()
@@ -240,6 +294,10 @@ def main():
     #driver = webdriver.Chrome()
     logger.info("Browser is Launched")
     #driver.get("http://127.0.0.1:81/login/login.php")
+    
+    if args.proxy_address:
+        proxy_address = args.proxy_address
+
     if args.login_url:
         login_url = args.login_url
 
@@ -248,7 +306,7 @@ def main():
         if not login_url:
             logger.error("No Login URL provided")
         else:
-            start_header, login_header = doLogin(login_url, driver, scriptFilePath = args.login_script)
+            start_header, login_header = doLogin(login_url, driver,proxy_address, scriptFilePath = args.login_script)
 
     if args.form_values_script:
         globalVariables.getFormValues(args.form_values_script)

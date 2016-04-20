@@ -42,6 +42,7 @@
 <a href="hobby.html"> Hobby</a>
 <br />
 <fieldset>Feedback form 
+
 <form method="get" action="feedback.php">
 
 <input type="text" id="name" name="name" placeholder="name" /><br/>
@@ -49,8 +50,6 @@
 <input type="submit" value="feedback" id="ignore"/>	
 </form>
 
-
-</form>
 
 </fieldset>
 </body>
