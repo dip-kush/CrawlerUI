@@ -71,14 +71,14 @@
     {% for wf_obj, wflow in vwflows %}
     <div class="col">
         <div class="col s12 m6">
-          <div class="card blue-grey darken-1">
+          <div class="card red darken-1">
             <div class="card-content white-text">
               <span class="card-title">{{ wf_obj.wflow_no }}</span>
               
               <ul>
                  {% for item in wflow %}
                   <li>
-                  {{ item.url}}{{item.data}}{{item.critical}}
+                  url: {{ item.url}}  data: {{item.data}}  critical: {{item.critical}}
                   </li>
 
                  {% endfor %}

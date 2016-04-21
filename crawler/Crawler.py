@@ -1,6 +1,7 @@
 import Queue
 import time
 import json
+import os
 import networkx as nx
 import matplotlib.pyplot as plt
 from urlparse import urlparse
@@ -15,6 +16,9 @@ from FormExtractor import getSubmitButtonNumber, fillFormValues
 from logger import LoggerHandler
 
 logger = LoggerHandler(__name__)
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+#imgpath = os.path.join(BASE_DIR, 'static/screenshots')
 
 
 def initState(domString, link, title, driver, globalVariables,depth,start_url,login_header):
@@ -35,7 +39,8 @@ def initState(domString, link, title, driver, globalVariables,depth,start_url,lo
         print item.xpath
     node.backtrackPath.append(link)
     fsm.addNode(0, node)
-    driver.save_screenshot("../static/screenshots/" + str(0) + ".png")
+    imgpath = os.path.join(BASE_DIR, "static/screenshots/"+str(0)+".png")
+    driver.save_screenshot(imgpath)
     if frameExists(node.domString):
         logger.info("Crawling Frames")
         crawlFrame(0, fsm, driver, globalVariables)
@@ -409,7 +414,9 @@ def addGraphNode(newNode, curNode, driver, fsm, entity,path):
         for item in c:
             print item.xpath
         time.sleep(1.5)
-        driver.save_screenshot("../static/screenshots/" + str(nodeNumber) + ".png")
+        imgpath = os.path.join(BASE_DIR, "static/screenshots/"+str(nodeNumber)+".png")
+        driver.save_screenshot(imgpath)
+        #driver.save_screenshot("../static/screenshots/" + str(nodeNumber) + ".png")
         clearContent()
         return nodeNumber
         #queue.put(nodeNumber)

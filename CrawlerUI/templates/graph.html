@@ -82,7 +82,7 @@ d3.json("static/jsonDataFile.txt", function(error, json) {
 node.append("image")
       .attr("xlink:href", function(d, i){
         //console.log(d, i);
-        return "static/screenshots/"+parseInt(i+1)+".png"
+        return "static/screenshots/"+parseInt(i)+".png"
       })
       .attr("x", -8)
       .attr("y", -8)
