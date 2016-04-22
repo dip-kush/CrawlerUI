@@ -281,9 +281,10 @@ def getWorkflow(request):
     vulnerable_wflows= []
     if request.method == "GET":
         id_val = request.GET["id"]
-        crawl_obj, vulnerable_wflows = getWorkflows(int(id_val), True)
+        crawl_obj, vulnerable_wflows, non_vulnerable_wflows = getWorkflows(int(id_val), True)
+    print non_vulnerable_wflows
     if vulnerable_wflows:
-        return render(request, "wflow.html", {"crawl_obj": crawl_obj, "vwflows": vulnerable_wflows})
+        return render(request, "wflow.html", {"crawl_obj": crawl_obj, "vwflows": vulnerable_wflows, "nonvflows": non_vulnerable_wflows})
     else:
         return render(request, "wflow.html")        
 
@@ -336,9 +337,12 @@ def getWfs(crawl_id):
 def getWorkflows(crawl_id, critical_bool):
     #crawl_id = 1
     workflows = []
+    non_vworkflows = []
     crawl_obj =  Crawl.objects.get(id=crawl_id)
     startHeader =  StartHeader.objects.get(scan_id=crawl_obj)
-    wflows_obj = Workflow.objects.filter(scan_id=crawl_obj, critical=critical_bool)
+    wflows_obj = Workflow.objects.filter(scan_id=crawl_obj)
+    #non_vflows_obj = Workflow.objects.filter(scan_id=crawl_obj, critical=False)
+    #all_wflows = wflows_obj+non_vlows_obj
     print wflows_obj 
     for wf in wflows_obj:
         wflow = []
@@ -357,12 +361,15 @@ def getWorkflows(crawl_id, critical_bool):
             header =  headerSplit(link.header, link.critical_node, link.response_dom)
             wflow.append(header)
             #print header
-        print wf.wflow_no 
-        workflows.append((wf,wflow))
+        print wf.wflow_no
+        if wf.critical == True: 
+            workflows.append((wf,wflow))
+        else:
+            non_vworkflows.append((wf, wflow))
     #return workflows
     printWorkflows(workflows) 
     vulnerable_wflows = executeWorkflows(workflows)
-    return (crawl_obj,vulnerable_wflows)
+    return (crawl_obj,vulnerable_wflows, non_vworkflows)
             
  
 def printWorkflows(workflows):    
